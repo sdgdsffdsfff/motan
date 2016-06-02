@@ -21,7 +21,7 @@
 
 
 # 基本介绍
-Motan是一套基于java开发的RPC框架，除了常规的点对点调用外，motan还提供服务治理功能，包括服务节点的自动发现、摘除、高可用和负载均衡等。Motan具有良好的扩展性，主要模块都提供了多种不同的实现，例如支持多种注册中心，支持多种rpc协议等。
+Motan是一套基于java开发的RPC框架，除了常规的点对点调用外，Motan还提供服务治理功能，包括服务节点的自动发现、摘除、高可用和负载均衡等。Motan具有良好的扩展性，主要模块都提供了多种不同的实现，例如支持多种注册中心，支持多种rpc协议等。
 
 ## 架构概述
 
@@ -62,7 +62,7 @@ Client端使用的模块，cluster是一组可用的Server在逻辑上的封装�
 ## 配置概述
 Motan框架中将功能模块抽象为四个可配置的元素，分别为：
 
-- protocol：服务通信协议。服务提供方与消费方进行远程调用的协议，默认为motan协议，使用hessian2进行序列化，netty作为Endpoint以及使用motan自定义的协议编码方式。
+- protocol：服务通信协议。服务提供方与消费方进行远程调用的协议，默认为Motan协议，使用hessian2进行序列化，netty作为Endpoint以及使用Motan自定义的协议编码方式。
 
 - registry：注册中心。服务提供方将服务信息（包含ip、端口、服务策略等信息）注册到注册中心，服务消费方通过注册中心发现服务。当服务发生变更，注册中心负责通知各个消费方。
 
@@ -82,7 +82,7 @@ Motan推荐使用spring配置rpc服务，目前Motan扩展了6个自定义Spring
 每种标签的详细含义请参考后文[配置说明](#config)部分。全部参数清单请参考[配置清单](zh_configuration)。
 
 # 使用Motan
-Motan主要使用Spring进行配置，业务代码无需修改。关于在项目中使用Motan框架的具体步骤，请参考：[快速入门](quickstart)。
+Motan主要使用Spring进行配置，业务代码无需修改。关于在项目中使用Motan框架的具体步骤，请参考：[快速入门](zh_quickstart)。
 
 在使用Motan框架时，除了配置之外还需要注意工程依赖及Motan框架本身的异常处理。
 
@@ -122,13 +122,13 @@ Motan框架采用模块化设计，使用时可以按需依赖。目前的模块
 
 Protocol用来配置Motan服务的协议。不同的服务适用不同的协议进行传输，可以自行扩展协议。
 
-### motan协议
+### Motan协议
 
 ```xml
 <motan:protocol name="motan" />
 ```
 
-Motan默认的rpc协议为motan协议，使用tcp长连接模式，基于netty通信。
+Motan默认的rpc协议为Motan协议，使用tcp长连接模式，基于netty通信。
 
 
 #### 负载均衡
@@ -272,10 +272,9 @@ Motan支持使用多种Registry模块，使用不同注册中心需要依赖对�
 
 * interface：标识服务的接口类名
 * ref：标识服务的实现类，引用具体的spring业务实现对象
-* export：标识服务的暴露方式，格式为“protocolId:port”（使用的协议及对外提供的端口号），其中protocolId：应与motan:protocol中的name一致
+* export：标识服务的暴露方式，格式为“protocolId:port”（使用的协议及对外提供的端口号），其中protocolId：应与motan:protocol中的id一致
 * group：标识服务的分组
 * module：标识模块信息	
-* protocol：标识service使用的协议，与motan:protocol中的name对应，默认为motan协议
 * basicService：标识使用的基本配置，引用motan:basicService对象
 
 Motan在注册中心的服务是以group的形式保存的，一般推荐一个分组以机房＋业务线进行命名，如yf-user-rpc。一个分组中包含若干的Service，一个Service即是java中的一个接口类名，每个Service下有一组能够提供对应服务的Server。
@@ -290,20 +289,18 @@ Motan在注册中心的服务是以group的形式保存的，一般推荐一个�
 rpc服务的通用配置，用于配置所有服务接口的公共配置，减少配置冗余。basicService包含以下常用属性：
 
 * id：标识配置项
-* export：标识服务的暴露方式，格式为“protocolId:port”（使用的协议及对外提供的端口号），其中protocolId：应与motan:protocol中的name对应
+* export：标识服务的暴露方式，格式为“protocolId:port”（使用的协议及对外提供的端口号），其中protocolId：应与motan:protocol中的id一致
 * group：标识服务的分组
 * module：标识模块信息
-* protocol：标识service使用的协议，与motan:protocol中的name对应，默认为motan协议
 * registry：标识service使用的注册中心，与motan:registry中的name对应
 
 motan:service可以通过以下方式引用基本配置。
 
 ```
 <!-- 通用配置，多个rpc服务使用相同的基础配置. group和module定义具体的服务池。export格式为“protocol id:提供服务的端口” -->
-<motan:basicService id="serviceBasicConfig" export="demoMotan:8002" group="motan-demo-rpc" module="motan-demo-rpc" registry="registry" protocol="motan"/>
+<motan:basicService id="serviceBasicConfig" export="demoMotan:8002" group="motan-demo-rpc" module="motan-demo-rpc" registry="registry"/>
 <!-- 通用配置，多个rpc服务使用相同的基础配置. group和module定义具体的服务池。export格式为“protocol id:提供服务的端口” -->
-<motan:service interface="com.weibo.motan.demo.service.MotanDemoService"
-                   ref="demoServiceImpl" basicService="serviceBasicConfig"/>
+<motan:service interface="com.weibo.motan.demo.service.MotanDemoService" ref="demoServiceImpl" basicService="serviceBasicConfig"/>
 ```
 
 motan:service中的basicService属性用来标识引用哪个motan:basicService对象，对于basicService中已定义的内容，service不必重复配置。
@@ -318,7 +315,7 @@ motan:service中的basicService属性用来标识引用哪个motan:basicService�
 * id：标识配置项
 * group：标识服务的分组
 * module：标识模块信息
-* protocol：标识referer使用的协议，与motan:protocol中的name对应，默认为motan协议
+* protocol：标识referer使用的协议，与motan:protocol中的name对应，默认为Motan协议
 * registry：标识referer使用的注册中心，与motan:registry中的name对应
 * basicReferer：标识使用的基本配置，引用motan:basicReferer对象
 
@@ -333,7 +330,7 @@ Client端订阅Service后，会从Registry中得到能够提供对应Service的�
 * id：标识配置项
 * group：标识服务的分组
 * module：标识模块信息
-* protocol：标识referer使用的协议，与motan:protocol中的name对应，默认为motan协议
+* protocol：标识referer使用的协议，与motan:protocol中的name对应，默认为Motan协议
 * registry：标识referer使用的注册中心，与motan:registry中的name对应
 
 motan:referer可以通过以下方式引用基本配置。
@@ -352,24 +349,22 @@ motan:referer中的basicService属性用来标识引用哪个motan:basicReferer�
 
 # 运维及监控
 ## 优雅的停止服务
-Motan支持在Consul集群环境下优雅的关闭节点，当需要关闭或重启节点时，可以先将待上线节点从集群中摘除，避免直接关闭影响正常请求。
+Motan支持在Consul、ZooKeeper集群环境下优雅的关闭节点，当需要关闭或重启节点时，可以先将待上线节点从集群中摘除，避免直接关闭影响正常请求。
 
 待关闭节点需要调用以下代码，建议通过servlet或业务的管理模块进行该调用。
 
 ```java
-MotanSwitcherUtil.setSwitcher(ConsulConstants.NAMING_PROCESS_HEARTBEAT_SWITCHER, false)
+MotanSwitcherUtil.setSwitcherValue(MotanConstants.REGISTRY_HEARTBEAT_SWITCHER, true)
 ```
-
-> 注意：Zookeeper模块此功能正在开发。
 
 ## 管理后台
 管理后台主要包括RPC服务查询、流量切换、Motan指令设置等功能，需使用ZooKeeper作为注册中心
 
 管理后台独立于Motan其他部分，可单独部署
 ### 管理后台安装
-1. 配置：
+1. 配置
     
-    修改配置文件config.properties，配置ZooKeeper的registry地址，默认不使用数据库
+    修改配置文件config.properties，配置注册中心类型（zookeeper, consul）及注册中心地址，默认不使用数据库
     
     默认的登录用户及权限如下：
         管理员：用户名admin 密码admin
@@ -386,7 +381,98 @@ MotanSwitcherUtil.setSwitcher(ConsulConstants.NAMING_PROCESS_HEARTBEAT_SWITCHER,
     将motan-open/motan-manager/target/motan-manager.war部署到任意web容器中（如：tomcat的webapps目录下），运行web容器即可
     
 ### 管理后台使用
-Coming Soon...
+#### RPC服务查询
+    
+查询指定group的所有service状态，包括正常提供服务的Server和正在调用的Client
+
+注：Consul注册中心暂不支持Client查询
+
+步骤：
+    
+- 在导航栏选择`RPC服务查询`，进入RPC服务查询页面
+
+- 下拉列表中选择要查询的服务所在的分组，如`motan-demo-rpc`，点击`查询`按钮
+
+![](media/manager-queryRPCService.png)
+    
+#### 流量切换（需要管理员权限）
+
+对指定服务根据分组或ip地址进行动态流量调整
+
+步骤：
+
+以下示例演示将来自`motan-demo-rpc`分组中`所有服务`的流量切换到`motan-demo-rpc2`分组中
+
+- 在导航栏选择`流量切换`，进入流量切换页面
+
+- Step1：
+
+    来源流量的`RPC分组`列表中选择需要切换流量的Service所在的分组，如`motan-demo-rpc`
+
+    `服务`列表中`*`表示所有服务，也可输入服务名称，语法见[服务名语法](#服务名语法)，点击`Next`
+
+    ![](media/manager-trafficswitch1.png)
+
+- Step2: 
+
+    目标流量的`RPC分组`列表中选择目标流量分组，如`motan-demo-rpc2`，
+
+    流量权重分配中根据需要按比例分配（可选范围是[0,100]），这里输入`0`和`1`，表示将来自`motan-demo-rpc`的流量全部转入`motan-demo-rpc2`，点击`Next`
+
+    ![](media/manager-trafficswitch2.png)
+
+- Step3：（可选）若需根据具体IP调整流量，可在此配置
+
+    `RPC Client`中输入来源流量的ip，`RPC Server`中输入目标流量的ip，点击`添加`后将在`路由规则结果`中显示
+
+    也可在`路由规则结果`中手动输入路由规则，路由规则见[路由规则语法](#路由规则语法)，点击`Next`
+
+    ![](media/manager-trafficswitch3.png)
+
+- Step4：指令预览
+
+    功能暂未启用，点击`Finish`完成流量切换操作
+
+##### 服务名语法
+
+- 类名支持`[a-zA-Z0-9_$.*]`
+- 运算符支持 `()` `!` `&` `|`，优先级由高到低
+- 复杂示例如下
+
+    ```
+    (com.weibo.User* & !com.weibo.UserMapping) | com.weibo.Status*
+    # 匹配com.weibo下以User开头的不包括UserMapping的所有服务，或以Status开头的所有服务
+    ```
+
+##### 路由规则语法
+
+- 必须包含`to`关键字，to左右两边分别为rpc client和rpc server的ip表达式，示例如下
+  
+    ```
+    * to 10.75.1.*
+    10.75.2.* to 10.73.1.*
+    * to !10.75.1.1
+    ```
+    
+#### 指令管理
+
+对注册中心下的所有指令信息进行增删改查操作
+
+步骤：
+    
+- 在导航栏选择`指令查询`，进入指令查询页面
+
+- 指令`修改`和`删除`操作需要管理员权限
+    
+    ![](media/manager-queryCommand.png)
+
+#### 操作记录查询（需要管理员权限）
+    
+查询指令增删改查记录
+
+步骤：
+    
+- 在导航栏选择`操作记录查询`，进入操作记录查询
 
 ## 日志说明
 Motan会打印两种类型的日志，帮助运维人员监控系统状态。
@@ -396,6 +482,10 @@ Motan会打印两种类型的日志，帮助运维人员监控系统状态。
 通过motan:service或motan:referer的accessLog属性来配置，基本格式如下：
 
 	"accesslog" - date - side - local_application_module - localip - interface - method_name - parameter_name - to_ip - remote_application_module - result - request_id - process_time_mills (分隔符为"|"）
+
+### 异常类日志
+
+请参考 [错误码及异常日志说明](zh_errorcode)。
 
 ### 统计类日志
 
@@ -427,6 +517,7 @@ Motan会打印两种类型的日志，帮助运维人员监控系统状态。
 内存统计：
 
 	[motan-memoryStatistic] 1954.67MB of 7987.25 MB (24.5%) used
+		
 	
 # 性能测试
 
@@ -529,7 +620,3 @@ Motan源码中提供了性能测试框架，便于使用者进行性能评估，
 | 50     | 20KString | 5614    | 8.904        |
 | 50     | 30KString | 3782    | 13.214       |
 | 50     | 50KString | 2285    | 21.869       |
-
-
-
-

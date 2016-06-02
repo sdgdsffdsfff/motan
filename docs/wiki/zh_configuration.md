@@ -53,6 +53,7 @@
 | regProtocol            | String  |         | 注册协议                     |
 | address                | String  |         | 注册中心地址                 |
 | port                   | int     | 0       | 注册中心缺省端口             |
+| connectTimeout         | int     | 1000    | 注册中心连接超时时间(毫秒)   |
 | requestTimeout         | int     | 200     | 注册中心请求超时时间(毫秒)   |
 | registrySessionTimeout | int     | 60s     | 注册中心会话超时时间(毫秒)   |
 | registryRetryPeriod    | int     | 30s     | 失败后重试的时间间隔         |
@@ -65,6 +66,8 @@
 \<motan:service/>
 
 \<motan:basicService/>
+
+> protocol、basic service、extConfig、service中定义相同属性时，优先级为service > extConfig > basic service > protocol
 
 | Property name  | Type    | Default     | Comment                                                                                                      |
 |----------------|---------|-------------|--------------------------------------------------------------------------------------------------------------|
@@ -81,9 +84,9 @@
 | group          | String  | default_rpc | 服务分组                                                                                                     |
 | version        | String  | 1.0         | 版本                                                                                                         |
 | throwException | String  | true        | 抛出异常                                                                                                     |
-| requestTimeout | String  | 200         | 请求超时时间(毫秒)                                                                                           |
-| connectTimeout | String  | 1000        | 连接超时时间(毫秒)                                                                                           |
-| retries        | int     | 0           | 重试次数                                                                                                     |
+| requestTimeout | String  | 200         | (目前未用)请求超时时间(毫秒)                                                                                 |
+| connectTimeout | String  | 1000        | (目前未用)连接超时时间(毫秒)                                                                                 |
+| retries        | int     | 0           | (目前未用)重试次数                                                                                           |
 | filter         | String  |             | 过滤器配置                                                                                                   |
 | listener       | String  |             | 监听器配置                                                                                                   |
 | connections    | int     |             | 连接数限制，0表示共享连接，否则为该服务独享连接数；默认共享                                                  |
@@ -109,6 +112,8 @@
 
 \<motan:basicReferer/>
 
+> protocol、basic referer、extConfig、referer中定义相同属性时，优先级为referer > extConfig > basic referer > protocol
+
 | Property name  | Type    | Default     | Comment                                                                                                      |
 |----------------|---------|-------------|--------------------------------------------------------------------------------------------------------------|
 | id             | String  |             | 服务引用 BeanId                                                                                              |
@@ -131,7 +136,7 @@
 | application    | String  | motan       | 应用信息                                                                                                     |
 | module         | String  | motan       | 模块信息                                                                                                     |
 | shareChannel   | boolean | false       | 是否共享channel                                                                                              |
-| timeout        | int     |             | 方法调用超时时间                                                                                             |
+| timeout        | int     |             | (目前未用)方法调用超时时间                                                                                   |
 | actives        | int     | 0           | 最大请求数，0为不做并发限制                                                                                  |
 | async          | boolean | false       | 方法是否异步                                                                                                 |
 | mock           | String  | false       | 设为true，表示使用缺省Mock类名，即：接口名+Mock 后缀，服务接口调用失败Mock实现类                             |
@@ -145,3 +150,12 @@
 | codec          | String  | motan       | 协议编码                                                                                                     |
 
 
+\<motan:method/>  
+_需要定义在motan:referer内，用于控制某个函数的行为_
+
+| Property name    | Type      | Default       | Comment                                                                                                        |
+| ---------------- | --------- | ------------- | -------------------------------------------------------------------------------------------------------------- |
+| name             | String    |               | 函数名                                                                                                         |
+| argumentTypes    | String    |               | 参数类型（逗号分隔）, 无参数用void. 如果方法无重载，则可不写                                                   |
+| requestTimeout   | int       | 200           | 请求超时时间(毫秒)                                                                                             |
+| connectTimeout   | int       | 1000          | 连接超时时间(毫秒)                                                                                             |
