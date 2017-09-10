@@ -19,6 +19,8 @@ package com.weibo.api.motan.util;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Snapshot;
+import com.weibo.api.motan.closable.Closable;
+import com.weibo.api.motan.closable.ShutDownHook;
 import com.weibo.api.motan.common.MotanConstants;
 import com.weibo.api.motan.common.URLParamType;
 import com.weibo.api.motan.rpc.Application;
@@ -38,13 +40,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class StatsUtil {
 
-    public static final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
-    protected static final ConcurrentMap<String, AccessStatisticItem> accessStatistics = new ConcurrentHashMap<String, AccessStatisticItem>();
-    protected static final List<StatisticCallback> statisticCallbacks = new CopyOnWriteArrayList<StatisticCallback>();
-    private static String SEPARATE = "\\|";
+    public static ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+    protected static ConcurrentMap<String, AccessStatisticItem> accessStatistics = new ConcurrentHashMap<String, AccessStatisticItem>();
+    protected static List<StatisticCallback> statisticCallbacks = new CopyOnWriteArrayList<StatisticCallback>();
+    public static String SEPARATE = "\\|";
+    protected static ScheduledFuture<?> scheduledFuture;
 
     static {
-        executorService.scheduleAtFixedRate(new Runnable() {
+        scheduledFuture = executorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
             public void run() {
@@ -56,6 +59,14 @@ public class StatsUtil {
                 logStatisticCallback();
             }
         }, MotanConstants.STATISTIC_PEROID, MotanConstants.STATISTIC_PEROID, TimeUnit.SECONDS);
+        ShutDownHook.registerShutdownHook(new Closable() {
+            @Override
+            public void close() {
+                if(!executorService.isShutdown()){
+                    executorService.shutdown();
+                }
+            }
+        });
     }
 
     public static void registryStatisticCallback(StatisticCallback callback) {
